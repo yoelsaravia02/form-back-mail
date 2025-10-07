@@ -1,3 +1,4 @@
+const axios = require("axios");
 const nodemailer = require("nodemailer");
 
 module.exports = async function handler(req, res) {
@@ -6,14 +7,13 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const { nombre, email, telefono, mensaje } = req.body;
+    const { nombre, email, telefono, mensaje, captcha } = req.body; // <-- Agregamos captcha
 
-    if (!nombre || !email || !mensaje /* || !captcha */) { // 🔧 captcha desactivado temporalmente
+    if (!nombre || !email || !mensaje || !captcha) {
       return res.status(400).json({ success: false, message: "Todos los campos son requeridos" });
     }
 
-    /* 
-    // 🔒 Verificar reCAPTCHA (volver a activar esto después de probar)
+    // 🔒 Verificar reCAPTCHA (ACTIVADO)
     const response = await axios.post(
       "https://www.google.com/recaptcha/api/siteverify",
       null,
@@ -28,10 +28,6 @@ module.exports = async function handler(req, res) {
     if (!response.data.success) {
       return res.status(400).json({ success: false, message: "reCAPTCHA inválido" });
     }
-    */
-
-    // ⚠️ reCAPTCHA desactivado temporalmente para pruebas
-    console.log("⚠️ reCAPTCHA desactivado temporalmente para pruebas.");
 
     // Configurar transporte de correo
     const transporter = nodemailer.createTransport({
@@ -47,9 +43,8 @@ module.exports = async function handler(req, res) {
     const mailOptions = {
       from: process.env.EMAIL_FROM,
       to: process.env.EMAIL_TO,
-      subject: `Nuevo mensaje de contacto - ${nombre}`,
+      subject: `Solicitud de RG & G - ${nombre}`,
       html: `
-        <h2>Nuevo mensaje de contacto</h2>
         <p><strong>Nombre:</strong> ${nombre}</p>
         <p><strong>Email:</strong> ${email}</p>
         <p><strong>Teléfono:</strong> ${telefono || "No proporcionado"}</p>
@@ -61,7 +56,6 @@ module.exports = async function handler(req, res) {
     await transporter.sendMail(mailOptions);
 
     res.status(200).json({ success: true, message: "Mensaje enviado correctamente" });
-
   } catch (error) {
     console.error("Error:", error);
     res.status(500).json({ success: false, message: "Error interno del servidor" });
