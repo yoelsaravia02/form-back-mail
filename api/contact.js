@@ -6,6 +6,10 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ success: false, message: "Método no permitido" });
   }
 
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
   try {
     const { nombre, email, telefono, mensaje, captcha } = req.body; // <-- Agregamos captcha
 
