@@ -7,7 +7,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { nombre, email, telefono, mensaje, captcha } = req.body;
+    const { nombre, email, telefono, mensaje } = req.body;
 
     if (!nombre || !email || !mensaje /* || !captcha */) { // 🔧 captcha desactivado temporalmente
       return res.status(400).json({ success: false, message: "Todos los campos son requeridos" });

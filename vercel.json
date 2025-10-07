@@ -1,8 +1,13 @@
 {
   "version": 2,
   "builds": [
-    { "src": "api/contact.js", "use": "@vercel/node" }
+    { "src": "api/*.js", "use": "@vercel/node" }
   ],
+  "functions": {
+    "api/*.js": {
+      "runtime": "nodejs18.x"
+    }
+  },
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/$1" }
   ]
