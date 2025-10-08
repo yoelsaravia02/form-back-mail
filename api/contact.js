@@ -2,22 +2,28 @@ const axios = require("axios");
 const nodemailer = require("nodemailer");
 
 module.exports = async function handler(req, res) {
+  // siempre añadir CORS headers
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
+  // responder preflight OPTIONS con 200
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+
   if (req.method !== "POST") {
     return res.status(405).json({ success: false, message: "Método no permitido" });
   }
 
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-
   try {
-    const { nombre, email, telefono, mensaje, captcha } = req.body; // <-- Agregamos captcha
+    const { nombre, email, telefono, mensaje, captcha } = req.body;
 
     if (!nombre || !email || !mensaje || !captcha) {
       return res.status(400).json({ success: false, message: "Todos los campos son requeridos" });
     }
 
-    // 🔒 Verificar reCAPTCHA (ACTIVADO)
+    // verificar reCAPTCHA
     const response = await axios.post(
       "https://www.google.com/recaptcha/api/siteverify",
       null,
@@ -33,7 +39,7 @@ module.exports = async function handler(req, res) {
       return res.status(400).json({ success: false, message: "reCAPTCHA inválido" });
     }
 
-    // Configurar transporte de correo
+    // transporter
     const transporter = nodemailer.createTransport({
       host: process.env.EMAIL_HOST,
       port: process.env.EMAIL_PORT,
